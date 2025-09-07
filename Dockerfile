@@ -1,20 +1,22 @@
-# ベースイメージ
-FROM node:20-alpine
+# 最新のNode.js LTSバージョンを使用
+FROM node:20-bullseye-slim
+
+# セキュリティアップデートの実行
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends dumb-init && \
+    npm install -g npm@latest && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # 作業ディレクトリ
 WORKDIR /app
 
-# 依存関係を先にコピーしてキャッシュ活用
-COPY package.json package-lock.json* ./ 
-
-# 依存関係インストール
-RUN npm install
-
-# アプリケーションコードをコピー
-COPY . .
-
 # 開発用ポート
 EXPOSE 3000
 
+# dumb-initを使用して適切なプロセス管理を行う
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
 # 開発モードで起動
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "cd /app && npm install && npm run dev"]

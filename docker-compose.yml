@@ -1,17 +1,18 @@
-version: "3.9"
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./:/app
+      - ./app:/app
+      - /app/node_modules
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
       - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
       - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      # テスト用の適当なユーザーとパスワード
       - DATABASE_URL=postgres://postgres:password@db:5432/musicdb
     depends_on:
       - db
