@@ -1,4 +1,3 @@
-import querystring from "querystring";
 
 const clientId = process.env.SPOTIFY_CLIENT_ID as string;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET as string;
@@ -9,28 +8,6 @@ export type Tokens = {
     refreshToken: string;
     expiresAt: number;
 };
-
-/**
- * 認可URL生成
- */
-export function getSpotifyAuthUrl(state: string) {
-    const scope = [
-        "user-read-email",
-        "user-read-private",
-        "user-library-read",
-        "playlist-read-private",
-    ].join(" ");
-
-    const params = querystring.stringify({
-        response_type: "code",
-        client_id: clientId,
-        scope,
-        redirect_uri: redirectUri,
-        state,
-    });
-
-    return `https://accounts.spotify.com/authorize?${params}`;
-}
 
 /**
  * 認可コードからトークンを取得

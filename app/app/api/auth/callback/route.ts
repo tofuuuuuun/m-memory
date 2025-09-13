@@ -1,5 +1,4 @@
-// src/app/api/auth/callback/route.ts
-export const runtime = "nodejs"; // Buffer等を使う場合は node ランタイムにする（任意だが安全）
+export const runtime = "nodejs";
 
 import { getSession } from "@/src/lib/session";
 import { exchangeCodeForTokens, getMe } from "@/src/lib/spotify";
@@ -9,11 +8,8 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
     const url = new URL(req.url);
     const code = url.searchParams.get("code");
-    const state = url.searchParams.get("state");
-    const storedState = (await cookies()).get("spotify_oauth_state")?.value;
 
-    // basic validation: code と state をチェック
-    if (!code || !state || !storedState || state !== storedState) {
+    if (!code) {
         // CSRF/state mismatch or missing code
         return NextResponse.redirect(new URL("/login?error=oauth_state", url));
     }
@@ -22,8 +18,7 @@ export async function GET(req: Request) {
         // code -> tokens に交換
         const tokens = await exchangeCodeForTokens(code); // { accessToken, refreshToken, expiresAt }
 
-        // トークンでユーザープロフィールを取得（オプションだが便利）
-        const me = await getMe(tokens.accessToken); // spotify /me
+        const me = await getMe(tokens.accessToken);
 
         // セッションにユーザー情報とトークンを保存
         const session = await getSession();
