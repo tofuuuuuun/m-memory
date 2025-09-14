@@ -20,6 +20,8 @@ const sessionOptions = {
     cookieName: "spotify_app_session",
     cookieOptions: {
         secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
     },
 };
 

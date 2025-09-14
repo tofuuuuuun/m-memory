@@ -25,16 +25,17 @@ export async function GET(req: Request) {
         session.user = {
             id: me.id,
             name: me.display_name ?? null,
-            email: me.email ?? null,
-            image: me.images?.[0]?.url ?? null,
         };
         session.tokens = tokens;
+
+        console.log("session:", session);
+
         await session.save();
 
+        console.log("cookies::", cookies());
+
         // state cookie は削除しておく
-        (await
-            // state cookie は削除しておく
-            cookies()).delete("spotify_oauth_state");
+        (await cookies()).delete("spotify_oauth_state");
 
         // 認証成功 → ダッシュボードへリダイレクト
         return NextResponse.redirect(new URL("/dashboard", url));

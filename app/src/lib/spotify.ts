@@ -86,3 +86,17 @@ export async function getMe(accessToken: string) {
 
     return res.json();
 }
+
+export async function fetchRecentlyPlayed(accessToken: string) {
+    const res = await fetch("https://api.spotify.com/v1/me/player/recently-played?limit=10", {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch recently played tracks");
+    }
+
+    return res.json();
+}
