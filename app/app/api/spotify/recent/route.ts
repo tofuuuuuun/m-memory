@@ -1,5 +1,5 @@
 import { authOptions } from "@/src/lib/auth";
-import { fetchRecentlyPlayed, refreshAccessToken } from "@/src/lib/spotify";
+import { checkTokenExpiry, fetchRecentlyPlayed, refreshAccessToken } from "@/src/lib/spotify";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
@@ -16,10 +16,16 @@ export async function GET() {
             : null
     });
 
+    if (session?.tokens?.expiresAt !== undefined && checkTokenExpiry(session.tokens.expiresAt)) {
+        console.log("Token has expired");
+    }
+
     // トークンがない場合は認証エラー
     if (!session?.tokens?.accessToken) {
         return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
+
+    console.log("line24:session:", session)
 
     try {
         // Spotify APIから最近聴いた曲を取得

@@ -35,6 +35,12 @@ export async function exchangeCodeForTokens(code: string): Promise<Tokens> {
     };
 }
 
+export function checkTokenExpiry(expiresAt: number): boolean {
+    console.log("Checking token expiry:", { expiresAt });
+    const now = Date.now() / 1000; // 秒単位
+    return now >= expiresAt;
+}
+
 /**
  * アクセストークンをリフレッシュ
  */
@@ -68,7 +74,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<Tokens> 
     // 新しいトークン情報を返す
     return {
         accessToken: data.access_token,
-        refreshToken: data.refresh_token || refreshToken, // リフレッシュトークンが返されない場合は古いものを使用
+        refreshToken: data.refresh_token || refreshToken,
         expiresAt: Date.now() + data.expires_in * 1000,
     };
 }
