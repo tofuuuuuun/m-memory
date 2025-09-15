@@ -1,11 +1,12 @@
-import { getSession } from "@/src/lib/session";
+import { authOptions } from "@/src/lib/auth";
 import { fetchRecentlyPlayed } from "@/src/lib/spotify";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
 
-    if (!session.tokens?.accessToken) {
+    if (!session?.tokens?.accessToken) {
         return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 

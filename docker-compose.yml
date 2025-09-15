@@ -12,8 +12,8 @@ services:
       - NODE_ENV=development
       - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
       - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
-      - SPOTIFY_REDIRECT_URI=${SPOTIFY_REDIRECT_URI}
-      - SESSION_PASSWORD=${SESSION_PASSWORD}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       # テスト用の適当なユーザーとパスワード
       - DATABASE_URL=postgres://postgres:password@db:5432/musicdb
     depends_on:

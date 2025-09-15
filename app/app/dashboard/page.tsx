@@ -1,31 +1,49 @@
 "use client";
 
+import type { Artist, TrackItem } from "@/src/type";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type Artist = {
-    name: string;
-};
-
-type TrackItem = {
-    track: {
-        name: string;
-        artists: Artist[];
-    };
-};
-
 export default function DashboardPage() {
+    const { status } = useSession();
     const [tracks, setTracks] = useState<TrackItem[]>([]);
+    const router = useRouter();
 
     useEffect(() => {
-        async function load() {
-            const res = await fetch("/api/spotify/recent");
-            if (res.ok) {
-                const data = await res.json();
-                setTracks(data.items || []);
-            }
+        // 認証されていない場合はログインページへリダイレクト
+        if (status === "unauthenticated") {
+            router.push("/login");
+            return;
         }
-        load();
-    }, []);
+
+        if (status === "authenticated") {
+            async function load() {
+                console.log("Fetching recent tracks...");
+                // Cookieの状態を確認
+                console.log("Document cookies:", document.cookie); // 注意: httpOnlyのCookieは見えません
+
+                const res = await fetch("/api/spotify/recent", {
+                    method: "GET",
+                    credentials: "include",
+                    cache: "no-store"
+                });
+                console.log("Response status:", res.status);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setTracks(data.items || []);
+                } else {
+                    console.log("Failed to fetch tracks:", await res.text());
+                }
+            }
+            load();
+        }
+    }, [status, router]);
+
+    if (status === "loading") {
+        return <div>読み込み中...</div>;
+    }
 
     return (
         <div>

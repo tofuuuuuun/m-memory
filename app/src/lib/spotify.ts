@@ -1,13 +1,8 @@
+import { Tokens } from "../type";
 
 const clientId = process.env.SPOTIFY_CLIENT_ID as string;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET as string;
 const redirectUri = process.env.SPOTIFY_REDIRECT_URI as string;
-
-export type Tokens = {
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: number;
-};
 
 /**
  * 認可コードからトークンを取得
@@ -70,9 +65,22 @@ export async function refreshAccessToken(refreshToken: string): Promise<Tokens> 
     };
 }
 
-/**
- * Spotify API: /me を取得
- */
+// アクセストークンを使った関数
+
+export async function fetchRecentlyPlayed(accessToken: string) {
+    const res = await fetch("https://api.spotify.com/v1/me/player/recently-played?limit=50", {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error(`Spotify API error: ${res.status}`);
+    }
+
+    return res.json();
+}
+
 export async function getMe(accessToken: string) {
     const res = await fetch("https://api.spotify.com/v1/me", {
         headers: {
@@ -81,21 +89,7 @@ export async function getMe(accessToken: string) {
     });
 
     if (!res.ok) {
-        throw new Error("Failed to fetch profile from Spotify");
-    }
-
-    return res.json();
-}
-
-export async function fetchRecentlyPlayed(accessToken: string) {
-    const res = await fetch("https://api.spotify.com/v1/me/player/recently-played?limit=10", {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    });
-
-    if (!res.ok) {
-        throw new Error("Failed to fetch recently played tracks");
+        throw new Error(`Spotify API error: ${res.status}`);
     }
 
     return res.json();
