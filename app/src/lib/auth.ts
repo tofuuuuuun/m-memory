@@ -9,7 +9,6 @@ export const authOptions: NextAuthOptions = {
             authorization: {
                 params: {
                     scope: "user-read-recently-played user-read-currently-playing user-library-read",
-                    redirect_uri: "http://127.0.0.1:3000/api/auth/callback/spotify"
                 },
             },
         }),
@@ -29,6 +28,7 @@ export const authOptions: NextAuthOptions = {
         },
         async session({ session, token }) {
             // セッションにトークンを追加
+            console.log("Session callback - adding tokens to session");
             return {
                 ...session,
                 user: {
@@ -41,6 +41,13 @@ export const authOptions: NextAuthOptions = {
                     expiresAt: token.expiresAt as number,
                 },
             };
+        },
+        async redirect({ url, baseUrl }) {
+            console.log("NextAuth redirect:", { url, baseUrl });
+            // 内部URLはそのまま使用
+            if (url.startsWith(baseUrl)) return url;
+            // 外部URLはベースURLに変換
+            return baseUrl;
         },
     },
     pages: {

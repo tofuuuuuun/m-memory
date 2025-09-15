@@ -1,17 +1,19 @@
 "use client";
 
 import type { Artist, TrackItem } from "@/src/type";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
-    const { status } = useSession();
+    const { data: session, status } = useSession();
     const [tracks, setTracks] = useState<TrackItem[]>([]);
+    const [error, setError] = useState("");
     const router = useRouter();
 
     useEffect(() => {
-        // 認証されていない場合はログインページへリダイレクト
+        if (status === "loading") return;
+
         if (status === "unauthenticated") {
             router.push("/login");
             return;
@@ -19,27 +21,39 @@ export default function DashboardPage() {
 
         if (status === "authenticated") {
             async function load() {
-                console.log("Fetching recent tracks...");
-                // Cookieの状態を確認
-                console.log("Document cookies:", document.cookie); // 注意: httpOnlyのCookieは見えません
+                try {
+                    const res = await fetch("/api/spotify/recent", {
+                        credentials: "include",
+                    });
 
-                const res = await fetch("/api/spotify/recent", {
-                    method: "GET",
-                    credentials: "include",
-                    cache: "no-store"
-                });
-                console.log("Response status:", res.status);
+                    if (res.ok) {
+                        const data = await res.json();
+                        setTracks(data.items || []);
+                    } else {
+                        const errorData = await res.json();
+                        console.error("Error fetching tracks:", errorData);
 
-                if (res.ok) {
-                    const data = await res.json();
-                    setTracks(data.items || []);
-                } else {
-                    console.log("Failed to fetch tracks:", await res.text());
+                        // トークン無効化エラーの場合は自動的にサインアウトして再ログインへ
+                        if (errorData.error === "token_revoked" || res.status === 401) {
+                            setError("セッションの有効期限が切れました。再度ログインしてください。");
+                            // 少し待ってからサインアウト
+                            setTimeout(() => {
+                                signOut({ callbackUrl: "/login?error=session_expired" });
+                            }, 2000);
+                            return;
+                        }
+
+                        setError(errorData.message || "データの取得に失敗しました");
+                    }
+                } catch (err) {
+                    console.error("Error in load function:", err);
+                    setError("サーバーとの通信に失敗しました");
                 }
             }
             load();
         }
     }, [status, router]);
+
 
     if (status === "loading") {
         return <div>読み込み中...</div>;
