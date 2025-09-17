@@ -2,12 +2,18 @@ import { Tokens } from "../type";
 
 const clientId = process.env.SPOTIFY_CLIENT_ID as string;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET as string;
-const redirectUri = process.env.SPOTIFY_REDIRECT_URI as string;
 
 /**
  * 認可コードからトークンを取得
  */
 export async function exchangeCodeForTokens(code: string): Promise<Tokens> {
+    console.log("============================================================")
+    console.log("clientId:", clientId);
+    console.log("============================================================")
+    console.log("============================================================")
+    console.log("clientSecret:", clientSecret);
+    console.log("============================================================")
+
     const response = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
         headers: {
@@ -19,10 +25,11 @@ export async function exchangeCodeForTokens(code: string): Promise<Tokens> {
         body: new URLSearchParams({
             grant_type: "authorization_code",
             code,
-            redirect_uri: redirectUri,
         }),
     });
-
+    console.log("============================================================")
+    console.log("Response status:", response.status);
+    console.log("============================================================")
     const data = await response.json();
     if (!response.ok) {
         throw new Error(data.error_description || "Failed to exchange code");
@@ -35,9 +42,12 @@ export async function exchangeCodeForTokens(code: string): Promise<Tokens> {
     };
 }
 
+/**
+ * アクセストークンの有効期限をチェック
+ */
 export function checkTokenExpiry(expiresAt: number): boolean {
     console.log("Checking token expiry:", { expiresAt });
-    const now = Date.now() / 1000; // 秒単位
+    const now = Date.now() / 1000;
     return now >= expiresAt;
 }
 
@@ -46,7 +56,7 @@ export function checkTokenExpiry(expiresAt: number): boolean {
  */
 export async function refreshAccessToken(refreshToken: string): Promise<Tokens> {
     const basicAuth = Buffer.from(
-        `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+        `${clientId}:${clientSecret}`
     ).toString("base64");
 
     const res = await fetch("https://accounts.spotify.com/api/token", {
@@ -61,12 +71,14 @@ export async function refreshAccessToken(refreshToken: string): Promise<Tokens> 
         }),
     });
 
-    console.log("line58: Refresh token response status:", res.status);
+    console.log("============================================================")
+    console.log("Refresh token response status:", res.status);
+    console.log("============================================================")
 
     if (!res.ok) {
         const errorBody = await res.text();
         console.error("Token refresh failed:", errorBody);
-        throw new Error(`Failed to refresh token: ${res.status}`);
+        // throw new Error(`Failed to refresh token: ${res.status}`);
     }
 
     const data = await res.json();
@@ -90,7 +102,6 @@ export async function fetchRecentlyPlayed(accessToken: string) {
     });
 
     if (!res.ok) {
-        // 重要: レスポンスをクローンしてからエラー詳細を読み取る
         const errorClone = res.clone();
 
         try {
