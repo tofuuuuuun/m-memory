@@ -22,21 +22,19 @@ export default function DashboardPage() {
         if (status === "authenticated") {
             async function load() {
                 try {
-                    const res = await fetch("/api/spotify/recent", {
-                        credentials: "include",
-                    });
+                    const res = await fetch("/api/spotify/recent", { credentials: "include" });
 
                     if (res.ok) {
                         const data = await res.json();
                         setTracks(data.items || []);
                     } else {
                         const errorData = await res.json();
+                        console.log("============================================================");
                         console.error("Error fetching tracks:", errorData);
+                        console.log("============================================================");
 
-                        // トークン無効化エラーの場合は自動的にサインアウトして再ログインへ
                         if (errorData.error === "token_revoked" || res.status === 401) {
                             setError("セッションの有効期限が切れました。再度ログインしてください。");
-                            // 少し待ってからサインアウト
                             setTimeout(() => {
                                 signOut({ callbackUrl: "/login?error=session_expired" });
                             }, 2000);

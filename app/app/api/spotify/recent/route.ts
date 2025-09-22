@@ -1,5 +1,5 @@
+import { checkTokenExpiry, refreshAccessToken } from "@/app/api/auth/[...nextauth]/route";
 import { authOptions } from "@/src/lib/auth";
-import { checkTokenExpiry, fetchRecentlyPlayed, refreshAccessToken } from "@/src/lib/spotify";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
@@ -10,7 +10,9 @@ export async function GET() {
     if (session?.tokens?.expiresAt !== undefined) {
         if (checkTokenExpiry(session.tokens.expiresAt)) {
             newTokens = await refreshAccessToken(session.tokens.refreshToken);
+            console.log("============================================================");
             console.log("Line22: token was expired and has been refreshed.");
+            console.log("============================================================");
         }
     }
 
@@ -19,19 +21,39 @@ export async function GET() {
     }
 
     try {
-        const data = await fetchRecentlyPlayed(newTokens ? newTokens.accessToken : session.tokens.accessToken);
-        return NextResponse.json(data);
+        const res = await fetch("https://api.spotify.com/v1/me/player/recently-played?limit=50", {
+            headers: {
+                Authorization: `Bearer ${session?.tokens?.accessToken || newTokens?.accessToken}`,
+            },
+        });
+
+        if (!res.ok) {
+            const errorClone = res.clone();
+
+            try {
+                const errorData = await errorClone.json();
+                console.log("============================================================");
+                console.log("Spotify API error details:", errorData);
+                console.log("============================================================");
+            } catch (e) {
+                console.log("============================================================");
+                console.log("Failed to parse error response", e);
+                console.log("============================================================");
+            }
+        }
+
+        return NextResponse.json(res.json());
     } catch (err) {
         if (err instanceof Error) {
+            console.log("============================================================");
             console.log("Error details:", err.message);
+            console.log("============================================================");
 
             // 401エラー（トークン期限切れ）の場合はリフレッシュを試みる
             if (err.message.includes("401") && session.tokens.refreshToken) {
                 try {
-                    const newTokens = await refreshAccessToken(session.tokens.refreshToken);
-
                     // 新しいトークンでもう一度APIを呼び出す
-                    const data = await fetchRecentlyPlayed(newTokens.accessToken);
+                    const data = await fetch("/api/spotify/recent", { credentials: "include" });
                     return NextResponse.json(data);
                 } catch (refreshErr) {
                     console.log("Failed to refresh token:", refreshErr);

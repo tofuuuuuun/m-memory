@@ -25,9 +25,9 @@ declare module "next-auth/jwt" {
 }
 
 export type Tokens = {
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: number;
+    accessToken?: string;
+    refreshToken?: string;
+    expiresAt?: number;
 };
 
 export type Artist = {
