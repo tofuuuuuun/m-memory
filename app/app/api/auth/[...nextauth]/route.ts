@@ -10,7 +10,7 @@ export const authOptions = ({
         SpotifyProvider({
             clientId: clientId,
             clientSecret: clientSecret,
-            authorization: "https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private,user-top-read",
+            authorization: "https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private,user-top-read,user-read-recently-played",
             token: "https://accounts.spotify.com/api/token",
             userinfo: "https://api.spotify.com/v1/me",
         })
@@ -55,12 +55,7 @@ export const POST = NextAuth(authOptions);
  * アクセストークンの有効期限をチェック
  */
 export function checkTokenExpiry(expiresAt: number | undefined): boolean {
-    if (!expiresAt) return false;
-
-    console.log("============================================================");
-    console.log("Checking token expiry:", { expiresAt });
-    console.log("============================================================");
-
+    if (typeof expiresAt !== "number") return false;
     const now = Date.now() / 1000;
     return now >= expiresAt;
 }
@@ -69,6 +64,9 @@ export function checkTokenExpiry(expiresAt: number | undefined): boolean {
  * アクセストークンをリフレッシュ
  */
 export async function refreshAccessToken(refreshToken: string): Promise<Tokens> {
+    console.log("============================================================")
+    console.log("Refresh token response start");
+    console.log("============================================================")
     try {
         const url = "https://accounts.spotify.com/api/token";
         const response = await fetch(url, {
@@ -90,7 +88,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<Tokens> 
         }
 
         console.log("============================================================")
-        console.log("Refresh token response status:", response.status);
+        console.log("Refresh token response end -> status:", response.status);
         console.log("============================================================")
 
         // 新しいトークン情報を返す
