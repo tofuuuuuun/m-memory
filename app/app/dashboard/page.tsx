@@ -10,7 +10,6 @@ export default function DashboardPage() {
     const [tracks, setTracks] = useState<TrackItem[]>([]);
     const [error, setError] = useState("");
     const router = useRouter();
-    console.log("DashboardPage useEffect - status:", status);
     useEffect(() => {
         if (status === "loading") return;
 

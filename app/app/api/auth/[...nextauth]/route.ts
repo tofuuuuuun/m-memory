@@ -64,9 +64,6 @@ export function checkTokenExpiry(expiresAt: number | undefined): boolean {
  * アクセストークンをリフレッシュ
  */
 export async function refreshAccessToken(refreshToken: string): Promise<Tokens> {
-    console.log("============================================================")
-    console.log("Refresh token response start");
-    console.log("============================================================")
     try {
         const url = "https://accounts.spotify.com/api/token";
         const response = await fetch(url, {
@@ -86,10 +83,6 @@ export async function refreshAccessToken(refreshToken: string): Promise<Tokens> 
         if (!response.ok) {
             throw refreshTokens
         }
-
-        console.log("============================================================")
-        console.log("Refresh token response end -> status:", response.status);
-        console.log("============================================================")
 
         // 新しいトークン情報を返す
         return {

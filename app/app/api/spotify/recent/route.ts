@@ -10,9 +10,6 @@ export async function GET() {
     if (session?.tokens?.expiresAt !== undefined) {
         if (checkTokenExpiry(session.tokens.expiresAt)) {
             newTokens = await refreshAccessToken(session.tokens.refreshToken);
-            console.log("============================================================");
-            console.log("Line22: token was expired and has been refreshed.");
-            console.log("============================================================");
         }
     }
 
@@ -29,7 +26,6 @@ export async function GET() {
 
         if (!res.ok) {
             const errorClone = res.clone();
-
             try {
                 const errorData = await errorClone.json();
                 console.log("============================================================");
@@ -42,7 +38,7 @@ export async function GET() {
             }
         }
 
-        return NextResponse.json(res.json());
+        return NextResponse.json(await res.json());
     } catch (err) {
         if (err instanceof Error) {
             console.log("============================================================");
@@ -54,7 +50,7 @@ export async function GET() {
                 try {
                     // 新しいトークンでもう一度APIを呼び出す
                     const data = await fetch("/api/spotify/recent", { credentials: "include" });
-                    return NextResponse.json(data);
+                    return NextResponse.json(await data.json());
                 } catch (refreshErr) {
                     console.log("Failed to refresh token:", refreshErr);
 
