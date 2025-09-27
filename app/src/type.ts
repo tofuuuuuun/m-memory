@@ -34,6 +34,11 @@ export type Artist = {
     name: string;
 };
 
+export type CurrentTrack = {
+    name: string;
+    artists: Artist[];
+};
+
 export type TrackItem = {
     track: {
         name: string;

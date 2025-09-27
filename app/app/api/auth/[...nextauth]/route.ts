@@ -10,7 +10,7 @@ export const authOptions = ({
         SpotifyProvider({
             clientId: clientId,
             clientSecret: clientSecret,
-            authorization: "https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private,user-top-read,user-read-recently-played",
+            authorization: "https://accounts.spotify.com/authorize?scope=user-read-email,user-read-private,user-top-read,user-read-recently-played,user-read-currently-playing",
             token: "https://accounts.spotify.com/api/token",
             userinfo: "https://api.spotify.com/v1/me",
         })
