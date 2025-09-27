@@ -16,15 +16,12 @@ export async function GET() {
     if (!session?.tokens?.accessToken) {
         return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
-    console.log("GET START TRACK!!!!!!!")
     try {
         const res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
             headers: {
                 Authorization: `Bearer ${session?.tokens?.accessToken || newTokens?.accessToken}`,
             },
         });
-
-        console.log("RES", res);
 
         if (!res.ok) {
             const errorClone = res.clone();
@@ -36,6 +33,11 @@ export async function GET() {
             }
         }
 
+        if (res.status === 204) {
+            return NextResponse.json(null);
+        }
+
+        console.log("aaaaaaaaaaaaa", res)
         return NextResponse.json(await res.json());
     } catch (err) {
         if (err instanceof Error) {
