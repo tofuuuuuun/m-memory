@@ -1,6 +1,6 @@
 import { checkTokenExpiry, refreshAccessToken } from "@/app/api/auth/[...nextauth]/route";
 import { authOptions } from "@/src/lib/auth";
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -16,9 +16,8 @@ export async function GET() {
     if (!session?.tokens?.accessToken) {
         return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
-
     try {
-        const res = await fetch("https://api.spotify.com/v1/me/player/recently-played?limit=5", {
+        const res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
             headers: {
                 Authorization: `Bearer ${session?.tokens?.accessToken || newTokens?.accessToken}`,
             },
@@ -28,21 +27,21 @@ export async function GET() {
             const errorClone = res.clone();
             try {
                 const errorData = await errorClone.json();
-                console.log("============================================================");
                 console.log("Spotify API error details:", errorData);
-                console.log("============================================================");
             } catch (e) {
-                console.log("============================================================");
                 console.log("Failed to parse error response", e);
-                console.log("============================================================");
             }
         }
+
+        if (res.status === 204) {
+            // 再生中でなければnull
+            return NextResponse.json(null);
+        }
+
         return NextResponse.json(await res.json());
     } catch (err) {
         if (err instanceof Error) {
-            console.log("============================================================");
             console.log("Error details:", err.message);
-            console.log("============================================================");
 
             // 401エラー（トークン期限切れ）の場合はリフレッシュを試みる
             if (err.message.includes("401") && session.tokens.refreshToken) {
@@ -64,4 +63,5 @@ export async function GET() {
 
         return NextResponse.json({ error: "Failed to fetch recently played" }, { status: 500 });
     }
+
 }
