@@ -37,7 +37,6 @@ export async function GET() {
                 console.log("============================================================");
             }
         }
-
         return NextResponse.json(await res.json());
     } catch (err) {
         if (err instanceof Error) {

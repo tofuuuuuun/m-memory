@@ -34,10 +34,10 @@ export async function GET() {
         }
 
         if (res.status === 204) {
+            // 再生中でなければnull
             return NextResponse.json(null);
         }
 
-        console.log("aaaaaaaaaaaaa", res)
         return NextResponse.json(await res.json());
     } catch (err) {
         if (err instanceof Error) {
