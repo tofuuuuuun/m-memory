@@ -37,6 +37,11 @@ export type Artist = {
 export type CurrentTrack = {
     name: string;
     artists: Artist[];
+    album: {
+        images: {
+            url: string;
+        }[];
+    }
 };
 
 export type TrackItem = {

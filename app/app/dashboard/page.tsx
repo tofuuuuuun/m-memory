@@ -44,9 +44,10 @@ export default function DashboardPage() {
                     if (recentRes.ok && currentRes.ok) {
                         const recentData = await recentRes.json();
                         const currentData = await currentRes.json();
+                        console.log("Recent tracks:", recentData);
+                        console.log("Current track:", currentData);
                         setRecentTracks(recentData.items || []);
                         setCurrentTrack(currentData.item || null);
-                        console.log("Recent Data:", recentData);
                     } else {
                         const errorData = await recentRes.json();
                         console.log("Error fetching tracks:", errorData);
@@ -61,8 +62,8 @@ export default function DashboardPage() {
 
                         setError(errorData.message || "データの取得に失敗しました");
                     }
-                } catch (err) {
-                    console.log("Error in load function:", err);
+                } catch (e) {
+                    console.log("Error in load function:", e);
                     setError("サーバーとの通信に失敗しました");
                 }
             }
@@ -83,6 +84,7 @@ export default function DashboardPage() {
                 {currentTrack ?
                     <li>
                         {currentTrack.name} - {currentTrack.artists.map((a: Artist) => a.name).join(", ")}
+                        <Image src={currentTrack.album.images[1].url} alt={currentTrack.name} width={300} height={300} />
                     </li>
                     : <li>再生中の曲はありません</li>}
             </ul>
